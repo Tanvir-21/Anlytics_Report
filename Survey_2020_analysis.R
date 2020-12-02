@@ -249,3 +249,80 @@ plotPlatformDesire <- function(survey_data,TotalNoofRows) {
 }
 
 plotPlatformDesire(survey_data,TotalNoofRows)
+
+
+#Salary analysis by developer type 
+
+## Bangladesh
+salary_by_developer_type_Bangladesh <- survey_data %>% 
+  filter(Country == "Bangladesh") %>% 
+  filter(!is.na(DevType)) %>% 
+  select(DevType, ConvertedComp) %>% 
+  mutate(DevType = str_split(DevType, pattern = ";")) %>% 
+  unnest(DevType) %>% 
+  group_by(DevType) %>% 
+  summarise(median_salary = median(ConvertedComp, na.rm = TRUE)) %>% 
+  arrange(desc(median_salary)) %>% 
+  ungroup() %>% 
+  mutate(DevType = reorder(DevType, median_salary))
+
+salary_by_developer_type_Bangladesh_plot <- ggplot(data = salary_by_developer_type_Bangladesh,
+                                                  aes(x = DevType, y = median_salary))+
+  geom_bar(stat = 'identity', fill = fillcolor2)+
+  geom_text(aes(x = DevType, y = 1, label = paste0("( ",round(median_salary/1e3)," K)",sep="")),
+            hjust = -3, vjust = 0.5, size = 3, color = 'black', fontface = 'bold')+
+  labs(
+    x = 'DevType',
+    y = 'median_salary',
+    title = "Median Salary according to developer type in Bangladesh"
+  )+
+  coord_flip()+
+  theme_classic()
+
+
+##worldwide
+salary_by_developer_type_worldwide<- survey_data %>% 
+  filter(!is.na(DevType)) %>% 
+  select(DevType, ConvertedComp) %>% 
+  mutate(DevType = str_split(DevType, pattern = ";")) %>% 
+  unnest(DevType) %>% 
+  group_by(DevType) %>% 
+  summarise(median_salary = median(ConvertedComp, na.rm = TRUE)) %>% 
+  arrange(desc(median_salary)) %>% 
+  ungroup() %>% 
+  mutate(DevType = reorder(DevType, median_salary))
+
+salary_by_developer_type_worldwide_plot <- ggplot(data = salary_by_developer_type_worldwide,
+                                                   aes(x = DevType, y = median_salary))+
+  geom_bar(stat = 'identity', fill = fillcolor2)+
+  geom_text(aes(x = DevType, y = 1, label = paste0("( ",round(median_salary/1e3)," K)",sep="")),
+            hjust = -3, vjust = 0.5, size = 3, color = 'black', fontface = 'bold')+
+  labs(
+    x = 'DevType',
+    y = 'median_salary',
+    title = "Median Salary according to developer type in Bangladesh"
+  )+
+  coord_flip()+
+  theme_classic()
+
+survey_schema %>% 
+  filter(Column == "YearsCodePro") %>% 
+  select(QuestionText)
+
+## Salary Analysis Dev Types - Years of experiences 
+#with yearcodepro
+salary_by_dev_type <- survey_data %>% 
+  select(DevType, YearsCodePro, ConvertedComp) %>% 
+  mutate(DevType = str_split(DevType, pattern = ";")) %>% 
+  unnest(DevType) %>% 
+  group_by(DevType, YearsCodePro) %>% 
+  summarise(median_salary = median(ConvertedComp, na.rm = TRUE)) %>% 
+  arrange(desc(median_salary)) %>% 
+  ungroup() %>% 
+  mutate(YearsCodePro = as.character(YearsCodePro),
+         DevType = as.character(DevType)) %>% 
+  mutate(DevType_YearsCodePro = paste(DevType,YearsCodePro)) %>%
+  mutate(DevType_YearsCodePro =str_replace(DevType_YearsCodePro,"NA","")) %>%
+  mutate(DevType_YearsCodePro = reorder(DevType_YearsCodePro, median_salary)) %>% 
+  head(10)
+
