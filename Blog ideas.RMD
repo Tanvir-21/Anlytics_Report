@@ -1,0 +1,263 @@
+#Blog ideas with the stackoverflow survey data
+```{r}
+#necessary_library
+library(dplyr)
+library(highcharter)
+library(tidyverse)
+library(RColorBrewer)
+library(pacman)
+library(ggplot2)
+library(treemapify)
+library(ggpubr)
+
+#opening survery data file 
+survey_data <- read.csv(file.choose())
+survey_schema  <- read.csv(file.choose())
+
+bd <-survey_data[survey_data$Country=="Bangladesh",]
+```
+
+
+###We have a few ideas to explore, we will talk about the ideas we have, how we can achieve the target blog and what visualization of that particular blog already exists. We can also explore what further might be done for the blog.
+
+#1. The important factors in getting a high paying job/a job in Bangladesh
+
+###we can make a random forest with the dataset to figure out what indicators there might be to make someone eligible for a job in Bangladesh. Whether its 
+
+
+##a.developer by profession  
+```{r}
+profession.bd <- bd %>% filter(!is.na(MainBranch))
+profession.bd.plot <-ggplot(profession.bd,aes(y=factor(MainBranch)))+  geom_bar(stat="count", width=0.7, fill="LightGreen")+
+  labs(title= "Professions of Respondents from Bangladesh",
+       y="Profession Criteria",
+       x="Response") + theme_minimal()
+profession.bd.plot 
+
+```
+
+
+##b.coding as hobby
+```{r}
+hobby.bd <- bd %>% filter(!is.na(Hobbyist))
+hobby.bd.plot <- ggplot(hobby.bd,aes(y=factor(Hobbyist)))+  geom_bar(stat="count", width=0.7, fill="LightGreen")+
+  labs(title= "Coding as a hobby: Trait among respondents from Bangladesh",
+       y="Hobby",
+       x="Response") + theme_minimal()
+hobby.bd.plot
+```
+
+##c. formal education/education level
+```{r}
+edulevel.bd <- bd %>% filter(!is.na(EdLevel))
+edulevel.bd.plot <- ggplot(edulevel.bd,aes(y=factor(EdLevel)))+  geom_bar(stat="count", width=0.7, fill="LightGreen")+
+  labs(title= "Education Level of Respondents from Bangladesh",
+       y="Education Level",
+       x="Response") + theme_minimal()
+edulevel.bd.plot
+
+```
+
+##d. undergrad major
+```{r}
+undergrad.bd <- bd %>% filter(!is.na(UndergradMajor))
+undergrad.bd.plot <- ggplot(undergrad.bd,aes(y=factor(UndergradMajor)))+  geom_bar(stat="count", width=0.7, fill="LightGreen")+
+  labs(title= "Primary Field of Study among Respondents from Bangladesh",
+       y="Primary Field of Study",
+       x="Response") + theme_minimal()
+undergrad.bd.plot 
+```
+
+##e. total years of coding 
+```{r}
+YearsCode.bd <- bd  %>% filter(!is.na(YearsCode)) 
+
+YearsOfCoding.bd.plot <- ggplot(YearsCode.bd,aes(y=YearsCode))+  geom_bar(stat="Count", width=.5, fill="LightGreen")+
+  labs(title= "Total years of coding of responder from Bangladesh",
+       y="Total Years of Code",
+       x="Response") + theme_minimal()
+YearsOfCoding.bd.plot
+```
+
+##f. Frequency of learning new language/framework 
+```{r}
+NEWLearn.bd <- bd  %>% filter(!is.na(NEWLearn))
+NEWLearn.bd.plot <- ggplot(NEWLearn.bd,aes(y=NEWLearn))+  geom_bar(stat="Count", width=.5, fill="LightGreen")+
+  labs(title= "Frequency of learning new language/framework of Respondents of Bangladesh",
+       y="Frequency",
+       x="Response") + theme_minimal()
+NEWLearn.bd.plot
+```
+
+
+##g. language they work with
+
+```{r}
+bdplotlanguage <- function(bd,TotalNoofRows) {
+  bd %>%
+    filter(!is.na(LanguageWorkedWith)) %>%
+    select(LanguageWorkedWith) %>%
+    mutate(LanguageWorkedWith = str_split(LanguageWorkedWith, pattern = ";")) %>%
+    unnest(LanguageWorkedWith) %>%
+    group_by(LanguageWorkedWith) %>%
+    summarise(Count = n()) %>%
+    arrange(desc(Count)) %>%
+    ungroup() %>%
+    mutate(TotalCount =  sum(Count)) %>%
+    mutate(Count =  Count/TotalCount) %>%
+    mutate(LanguageWorkedWith = reorder(LanguageWorkedWith,Count)) %>%
+    head(10) %>%
+    
+    ggplot(aes(x = LanguageWorkedWith,y = Count)) +
+    geom_bar(stat='identity') +
+    geom_text(aes(x = LanguageWorkedWith,y = .01, label = paste0("( ",round(Count*100,2)," %)",sep="")),
+              hjust= -3, vjust=.5, size = 4, colour = 'black',
+              fontface = 'bold') +
+    scale_y_continuous(labels = scales::percent_format()) +
+    labs(x = 'Language Worked With', 
+         y='Percentage', 
+         title = 'Language worked with this year and Percentage:Bangladesh') +
+    coord_flip() +
+    theme_bw()
+}
+
+bdplotlanguage(bd,TotalNoofRows)
+
+
+```
+
+###There could be many other indicators and insights we might find from the dataset.
+
+
+#2.Stackoverflow related data from Bangladesh developer community
+###Finding insights about the stackoverflow community in Bangladesh. (We could try to figure out if they have some significant trait )
+
+##a. frequency of stackoverflow visit among Bangladeshi Developers
+```{r}
+SOVisitFreq.bd<- bd  %>% filter(!is.na(SOVisitFreq))
+SOVisitFreq.bd.plot <- ggplot(SOVisitFreq.bd,aes(y=SOVisitFreq))+  geom_bar(stat="Count", width=.5, fill="LightGreen")+
+  labs(title= "Frequency of stackoverflow visit Among respondents",
+       y="Frequency",
+       x="Response") + theme_minimal()
+SOVisitFreq.bd.plot
+```
+
+##b. Existence of stackoverflow account among Bangladeshi Developers
+```{r}
+SOAccount.bd<-bd  %>% filter(!is.na(SOAccount))
+SOAccount.bd.plot <- ggplot(SOAccount.bd,aes(y=SOAccount))+  geom_bar(stat="Count", width=.5, fill="LightGreen")+
+  labs(title= "Existence of stackoverflow account Among respondents",
+       y="Frequency",
+       x="Response") + theme_minimal()
+SOAccount.bd.plot
+```
+
+##c. Frequency of participating in SO Q/A among Bangladeshi Developers
+```{r}
+frequencyQA.bd<-bd  %>% filter(!is.na(SOPartFreq))
+frequencyQA.bd.plot <- ggplot(frequencyQA.bd,aes(y=SOPartFreq))+  geom_bar(stat="Count", width=.5, fill="LightGreen")+
+  labs(title= "Frequency of participating in stackoverflow Q/A Among respondents",
+       y="Frequency",
+       x="Response") + theme_minimal()
+frequencyQA.bd.plot
+```
+
+#3. Importance of Education actually in Bangladesh (to become a developer/get a job) vs Importance of education in the eyes of the respondents
+##We have to figure out how we want to represent the importance of education (like if the target is getting a job).
+
+##Importanct of education in the eyes of the respondents
+```{r}
+importanceofedu.bd  <- bd %>% filter(!is.na(NEWEdImpt))
+importanceofedu.bd.plot<- ggplot(importanceofedu.bd,aes(y=factor(NEWEdImpt)))+  geom_bar(stat="count", width=0.7, fill="LightGreen")+
+  labs(title= "Importance of formal education in the eyes of Respondentss from Bangladesh",
+       y="Importance",
+       x="Response") + theme_minimal()
+importanceofedu.bd.plot
+```
+
+#4. Language worked with, platform design, language and platform preference for next year
+##PLATFORM DESIRE BD
+```{r}
+bdplotPlatformDesire <- function(bd,TotalNoofRows) {
+  bd %>%
+    filter(!is.na(PlatformDesireNextYear)) %>%
+    select(PlatformDesireNextYear) %>%
+    mutate(PlatformDesireNextYear = str_split(PlatformDesireNextYear, pattern = ";")) %>%
+    unnest(PlatformDesireNextYear) %>%
+    group_by(PlatformDesireNextYear) %>%
+    summarise(Count = n()) %>%
+    arrange(desc(Count)) %>%
+    ungroup() %>%
+    mutate(TotalCount =  sum(Count)) %>%
+    mutate(Count =  Count/TotalCount) %>%
+    mutate(PlatformDesireNextYear = reorder(PlatformDesireNextYear,Count)) %>%
+    head(10) %>%
+    
+    ggplot(aes(x = PlatformDesireNextYear,y = Count)) +
+    geom_bar(stat='identity') +
+    geom_text(aes(x = PlatformDesireNextYear,y = .01, label = paste0("( ",round(Count*100,2)," %)",sep="")),
+              hjust= -3, vjust=.5, size = 4, colour = 'black',
+              fontface = 'bold') +
+    scale_y_continuous(labels = scales::percent_format()) +
+    labs(x = 'PlatformDesireNextYear', 
+         y='Percentage', 
+         title = 'Platform Desire NextYear and Percentage: Bangladesh') +
+    coord_flip() +
+    theme_bw()
+}
+bdplotPlatformDesire(bd,TotalNoofRows)
+
+```
+
+##language worked with BD
+
+```{r}
+bdplotlanguage <- function(bd,TotalNoofRows) {
+  bd %>%
+    filter(!is.na(LanguageWorkedWith)) %>%
+    select(LanguageWorkedWith) %>%
+    mutate(LanguageWorkedWith = str_split(LanguageWorkedWith, pattern = ";")) %>%
+    unnest(LanguageWorkedWith) %>%
+    group_by(LanguageWorkedWith) %>%
+    summarise(Count = n()) %>%
+    arrange(desc(Count)) %>%
+    ungroup() %>%
+    mutate(TotalCount =  sum(Count)) %>%
+    mutate(Count =  Count/TotalCount) %>%
+    mutate(LanguageWorkedWith = reorder(LanguageWorkedWith,Count)) %>%
+    head(10) %>%
+    
+    ggplot(aes(x = LanguageWorkedWith,y = Count)) +
+    geom_bar(stat='identity') +
+    geom_text(aes(x = LanguageWorkedWith,y = .01, label = paste0("( ",round(Count*100,2)," %)",sep="")),
+              hjust= -3, vjust=.5, size = 4, colour = 'black',
+              fontface = 'bold') +
+    scale_y_continuous(labels = scales::percent_format()) +
+    labs(x = 'Language Worked With', 
+         y='Percentage', 
+         title = 'Language worked with this year and Percentage:Bangladesh') +
+    coord_flip() +
+    theme_bw()
+}
+
+bdplotlanguage(bd,TotalNoofRows)
+
+
+```
+
+
+#5.Future of Bangladesh Developer Community 
+##Filtering the population group aged from 16-25 and getting insights on how this generation developers are different and what significant traits they might have
+
+
+#6.OS
+##Different operating system used by the respondents from Bangladesh
+```{r}
+OS.bd<- bd  %>% filter(!is.na(OpSys))
+OS.bd.plot <- ggplot(OS.bd,aes(y=OpSys))+  geom_bar(stat="Count", width=.5, fill="LightGreen")+
+  labs(title= "Operating system used by the Respondents of Bangladesh",
+       y="Frequency",
+       x="Response") + theme_minimal()
+OS.bd.plot
+```
+
