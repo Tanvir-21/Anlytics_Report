@@ -1,0 +1,196 @@
+---
+title: "Analytics Blog"
+author: "Softanbees Technology Pvt. Limited"
+output: 
+    html_document:
+      toc: true
+      toc_float: true
+---
+# Programming, a new hobby for the 21st century & young generation of Bangladesh: an interactive study from StackOverflow 
+
+*“Happy is the man who can make a living by his hobby”*  -George Bernard Shaw, Irish playwright, critic, polemicist, and political activist
+
+As for now, hobbies have been considered a regular task that is done for amusement, usually during leisure time and not professionally. But with the rapid growth of competition and complications, hobbies have been an ideal example for recreation and remuneration as well nowadays. The Young generation has been trying to find out their passion and vision on the same platform and as a result, it shows that a lot of people are now involved in problem-solving more precisely computer programming.
+
+According to a recent study on StackOverflow we have found that more than fifty thousand, 50,388 users are comfortable with programming as a hobby. Although 14,028 respondents have not been active in programming as a hobby, that is a great indication that people are not only learning programming to survive in this competitive era but enjoying programming as well. 
+
+
+```{r setup, include=FALSE} 
+
+library(RColorBrewer)
+library(pacman)
+library(ggplot2)
+library(treemapify)
+library(ggpubr)
+library(tinytex)
+library(tidyverse)
+library(dplyr)
+library(highcharter)
+
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+survey_data <- read.csv(file.choose())
+survey_schema <-read.csv(file.choose())
+fillcolor1 <- "#FE8358"
+fillcolor2 <- "#F1FB92"
+```
+
+```{r  message=FALSE, warning=FALSE}
+total_countries <- survey_data %>%
+  group_by(Country)%>% 
+  summarise(Number=n())%>% 
+  arrange(desc=Number)%>% 
+  ungroup()%>% 
+  mutate(Country = reorder(Country, Number))%>% 
+  select(Country, Number)
+
+#Finding the countries with top respondents
+
+top_countries <- survey_data %>% filter(!is.na(Country))  %>%
+  group_by(Country)%>% 
+  summarise(Number=n())%>% 
+  arrange(desc=Number)%>% 
+  ungroup()%>% 
+  mutate(Country = reorder(Country, Number))%>% 
+  top_n(20, wt = Number)
+topcountries_plot <- ggplot(top_countries,aes(x= Number, y=factor(Country)))+  
+  geom_bar(stat="identity", width=0.7, fill=fillcolor1)+
+  labs(title= "Countries with top Respondents",
+       y="Country",
+       x="Number of Respondents") +
+  geom_text(aes(label=Number), vjust=0, color="black", size=3.5)+ theme_minimal()
+topcountries_plot
+```
+
+## Participants from Bangladesh and other countries:
+
+Among the respondents, it can be seen that most of the respondents are from the United States of America with 12,469 users, India is in the second position with 8403 respondents, the United Kingdom with  3896, and Germany with 3890 respondents. Countries like Canada (2191), France(1898), Brazil ( 1818), Netherlands (1343), Poland( 1278),  Australia (1208), Spain (1161), Italy (1117), Russian Federation( 1092) have participated in the survey. Other than that countries from South Asia, Pakistan has also participated. From Bangladesh 609 people have participated in the survey which is comparatively better than other developing countries as the number of participants might show the interest of people across the countries.
+
+
+## Programming as Hobby: What is the response in Bangladesh?
+
+
+It is aspiring that most of the respondents from Bangladesh have answered affirmatively in the survey, Among 609 respondents while 105 have answered negatively 504 have said their hobby is programming. In a country like Bangladesh where educational opportunities are not enough according to the ratio of the population, doing programming as a hobby is inspirational as many people might not have enough opportunity to learn or code for academic purposes, people can code as their hobby and explore programming with their accessible media. 
+
+```{r  message=FALSE, warning=FALSE}
+bd <-survey_data[survey_data$Country=="Bangladesh",]
+
+hobby.bd <- bd %>% filter(!is.na(Hobbyist)) %>% 
+  group_by(Hobbyist) %>% 
+  count()
+
+hobby.bd.plot <- ggplot(hobby.bd,aes(x=n, y=factor(Hobbyist)))+  geom_bar(stat="identity", width=0.7, fill=fillcolor1)+
+  labs(title= "Coding as a hobby: Trait among respondents from Bangladesh",
+       y="Hobby",
+       x="Response") +geom_text(aes(label=n), vjust=0, color="black", size=3.5)+ theme_minimal()
+hobby.bd.plot
+```
+
+## The young generation in the programming sector: 
+
+While it is clear that the maximum number of teenagers from the city area is now involved in tech enthusiasm, most of the coders have started their code in their 20. It might have started as interest or not but in the end, it has become a hobby come passion. In A recent study from Stackoverflow, we have found that people started coding the very first at the age of 17-22.  Among the respondents, it also holds major significance that young individuals from 10-14 age have started coding at a primary age of their education which certainly is a hope for the country. Another matter of optimism is that the new generation of Bangladesh is not only wasting time on youtube for entertainment and recreation but also trying to inspect and explore the new tech movement by coding.
+
+```{r  message=FALSE, warning=FALSE}
+age.bd<- bd %>% filter(!is.na(Age1stCode)) %>% 
+  group_by(Age1stCode) %>% 
+  count()
+age.bd.plot <- ggplot(age.bd,aes(x=n, y=factor(Age1stCode)))+  geom_bar(stat="identity", width=0.7, fill=fillcolor1)+
+  
+  labs(title= "Age of responder during first code from Bangladesh",
+       y="Age during first code",
+       x="Response") +geom_text(aes(label=n), vjust=0, color="black", size=3.5) + theme_minimal()
+age.bd.plot
+```
+
+
+
+## Which platforms are on-trend? 
+
+Programming has been on trend for the tech industry for several years but striking to a comfortable platform is also necessary for the users. Looking at the survey it can be said that most of the respondents have been using Windows as an operating system. Among the respondents 330 people have been using Windows, 119 people have been using Linux-based and 50 people are using macOS. As for now, Windows is on top of being user-friendly and fast speed. Also, the latest versions have more built-in security which enhances performance as well. Linux users are also getting the opportunity as Linux is also available with a decent comprehensive collection of software and this software is usually needed for desktops, laptops/notebooks, and PC servers.
+
+```{r  message=FALSE, warning=FALSE}
+OS.bd<- bd  %>% filter(!is.na(OpSys)) %>% 
+  group_by(OpSys) %>% 
+  count()
+OS.bd.plot <- ggplot(OS.bd,aes(x=n,y=factor(OpSys))) +  geom_bar(stat="identity", width=.5, fill=fillcolor1) +
+  labs(title= "Operating system used by the Respondents of Bangladesh", y="Frequency",  x="Response") + geom_text(aes(label=n), vjust=0, color="black", size=3.5) + theme_minimal()
+OS.bd.plot
+```
+
+## Why programming an ideal hobby for Bangladeshi job seekers
+
+As the demand for computing innovations and solutions is increasing day by day, choosing computer programming as a career path is definitely a good initiative. As unemployment is one of the major problems in Bangladesh, programming can be a significant opportunity for numerous career opportunities as most of the professional occupations nowadays require digital competencies, including programming. 
+
+According to Bikroy.com, some of the best-paid jobs in Bangladesh are : 
+
+![MarineGEO circle logo](/Users/mashi/Downloads/job.jpg "Best Paid jobs")
+
+ 
+Websites like Bikroy.com and others have found that most of the best-paid jobs require computer skills and programming. While looking at the requirements, jobs like Data entry, analyst, developers, and managers need to have good programming language as well. Thus, having programming as a hobby is much more beneficial than others.
+
+
+## Platform desired for the next year:
+
+From the study, the respondents are quite hopeful for the platforms like Windows, Linux, Android, and AWS. Among the respondents, 216 people have voted for Linux, Android (189), AWS(185), and Windows (179). It is a tough prediction that while most of the respondents are using Windows for these several years, Linux is on top of the desired platform. Platforms like Docker(167), Google Cloud Platform( 140), IOs(98), WordPress (84) are also on the list. 
+
+```{r  message=FALSE, warning=FALSE}
+bdplotPlatformDesire <- function(bd,TotalNoofRows) {
+  bd %>%
+    filter(!is.na(PlatformDesireNextYear)) %>%
+    select(PlatformDesireNextYear) %>%
+    mutate(PlatformDesireNextYear = str_split(PlatformDesireNextYear, pattern = ";")) %>%
+    unnest(PlatformDesireNextYear) %>%
+    group_by(PlatformDesireNextYear) %>%
+    summarise(Count = n()) %>%
+    arrange(desc(Count)) %>%
+    ungroup() %>%
+    mutate(TotalCount =  sum(Count)) %>%
+    mutate(Count =  Count/TotalCount) %>%
+    mutate(PlatformDesireNextYear = reorder(PlatformDesireNextYear,Count)) %>%
+    head(10) %>%
+    
+    ggplot(aes(x = PlatformDesireNextYear,y = Count)) +
+    geom_bar(stat='identity',fill= fillcolor1) +
+    geom_text(aes(x = PlatformDesireNextYear,y = .01, label = paste0("( ",round(Count*100,2)," %)",sep="")),
+              hjust= -3, vjust=.5, size = 4, colour = 'black',
+              fontface = 'bold') +
+    scale_y_continuous(labels = scales::percent_format()) +
+    labs(x = 'PlatformDesireNextYear', 
+         y='Percentage', 
+         title = 'Platform Desire NextYear and Percentage: Bangladesh') +
+    coord_flip() +
+    theme_bw()
+}
+bdplotPlatformDesire(bd,TotalNoofRows)
+
+bdplatform <- bd %>%
+  filter(!is.na(PlatformDesireNextYear)) %>%
+  select(PlatformDesireNextYear) %>%
+  mutate(PlatformDesireNextYear = str_split(PlatformDesireNextYear, pattern = ";")) %>%
+  unnest(PlatformDesireNextYear) %>%
+  group_by(PlatformDesireNextYear) %>%
+  summarise(Count = n())
+platformplot <- ggplot(bdplatform,aes(x= Count, y=factor(PlatformDesireNextYear)))+  
+  geom_bar(stat="identity", width=0.7, fill=fillcolor1)+
+  labs(title= "Platform Desire NextYear: Bangladesh",
+       y="PlatformDesireNextYear",
+       x="Response") +
+  geom_text(aes(label=Count), vjust=0, color="black", size=3.5)+ theme_minimal()
+platformplot
+```
+
+To summarize, we can address that Bangladesh is climbing high using the ladder of technology day by day. For evidence, the development among the young programmers and tech enthusiasts from the recent past days are quite satisfying. Whether it is for the purpose of self recreation or others, programming, as well as technology, has gathered a lot of young people together to work on for the betterment of the country.  Although development is ongoing, there are also much more steps for the technological sector in Bangladesh. Mostly, utilizing our young generation to form an improved and rationalized next generation so that they can support the country's acceleration towards the peak of evolution.
+
+
+
+Written by: Aishwarjyo Roy https://www.linkedin.com/in/aishwarjyo-roy-09a93a169/  
+
+Analysis done by: MD Tanvir Anjum https://www.linkedin.com/in/mdtanviranjum21/  
+Mashiat Amin Farin https://www.linkedin.com/in/mashiataminfarin
+
+
+
+
+
+References:  
